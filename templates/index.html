@@ -13,9 +13,29 @@
 </h1>
 
 <br>
+<div style="text-align: center;">
+<p id="quote-text">
+    {{ quote }}
+</p>
+<br>
+<p id="quote-auth"> - {{ auth }}</p>
+</div>
+<br>
+<br>
 
-<p>Lorem ipsum, 
-    dolor sit amet consectetur adipisicing elit.
-     Totam error quam in consequuntur earum deleniti nemo quas quidem maiores saepe, 
-    voluptas beatae aperiam cum, minima, odit sit magnam accusantium eos!</p>
+<div style="text-align: center;">
+<button onclick="getNewQuote()">New Quote</button>
+</div>
+
+<script>
+function getNewQuote() {
+    fetch('/api/quote')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('quote-text').textContent = data.quote;
+            document.getElementById('quote-auth').textContent = ' - ' + data.auth;
+        });
+}
+</script>
+
 {% endblock %}

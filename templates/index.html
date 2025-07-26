@@ -2,38 +2,52 @@
 
 <!--Head Block-->
 {% block head %}
-
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 {% endblock %}
 
 <!--Body Block-->
 {% block body %} 
 
-<h1 style="text-align: center;">
-    Quotes To Keep Your Hopes Up!
-</h1>
-
-<br>
-<div style="text-align: center;">
-<p id="quote-text">
-    {{ quote }}
-</p>
-<br>
-<p id="quote-auth"> - {{ auth }}</p>
-</div>
-<br>
-<br>
-
-<div style="text-align: center;">
-<button onclick="getNewQuote()">New Quote</button>
+<div class="quote-container">
+    <h1>Quotes To Keep Your Hopes Up!</h1>
+    
+    <div class="quote-content">
+        <p id="quote-text">{{ quote }}</p>
+        <p id="quote-auth"> - {{ auth }}</p>
+    </div>
+    
+    <button onclick="getNewQuote()">New Quote</button>
 </div>
 
 <script>
 function getNewQuote() {
+    // Add loading state
+    const container = document.querySelector('.quote-container');
+    container.classList.add('quote-loading');
+    
     fetch('/api/quote')
         .then(response => response.json())
         .then(data => {
-            document.getElementById('quote-text').textContent = data.quote;
-            document.getElementById('quote-auth').textContent = ' - ' + data.auth;
+            // Add transition animation
+            const quoteText = document.getElementById('quote-text');
+            const quoteAuth = document.getElementById('quote-auth');
+            
+            quoteText.classList.add('quote-transition');
+            quoteAuth.classList.add('quote-transition');
+            
+            setTimeout(() => {
+                quoteText.textContent = data.quote;
+                quoteAuth.textContent = ' - ' + data.auth;
+                
+                // Remove loading and transition classes
+                container.classList.remove('quote-loading');
+                quoteText.classList.remove('quote-transition');
+                quoteAuth.classList.remove('quote-transition');
+            }, 300);
+        })
+        .catch(error => {
+            console.error('Error fetching quote:', error);
+            container.classList.remove('quote-loading');
         });
 }
 </script>

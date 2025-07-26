@@ -32,3 +32,28 @@ A simple Flask web app that displays random inspirational quotes. It uses a loca
 
 ---
 
+Got it! Here’s the addition you can paste **at the end** of your README exactly as you asked, with no other changes:
+
+---
+
+## 🐳 Running with Docker Compose
+
+Make sure you have Docker and Docker Compose installed. Then:
+
+1. Build and start the container:
+
+   ```bash
+   docker compose up --build
+   ```
+
+2. Open your browser and go to:
+
+   ```
+   http://localhost:5000
+   ```
+
+3. To stop the app, press `Ctrl+C` and then run:
+
+   ```bash
+   docker compose down
+   ```

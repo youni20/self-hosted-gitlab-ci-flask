@@ -1,37 +1,20 @@
 stages:
-  - checkout
   - build
   - test
   - push
 
 variables:
-  IMAGE_NAME: youni8/flask-app  # Replace with your actual Docker Hub repo
-  DOCKER_TLS_CERTDIR: ""        # Required to disable TLS when using DinD
+  IMAGE_NAME: youni8/flask-app
+  DOCKER_TLS_CERTDIR: ""  # Required for Docker-in-Docker (DinD)
 
-# Enable Docker-in-Docker service with proper alias
 services:
   - name: docker:dind
     alias: docker
 
-# Cache pip dependencies
-cache:
-  key: ${CI_COMMIT_REF_SLUG}
-  paths:
-    - .cache/pip
-
 before_script:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  - pip install --upgrade pip
 
-checkout_code:
-  stage: checkout
-  script:
-    - echo "GitLab checks out the code automatically"
-  rules:
-    - changes:
-        - "**/*"
-
-build_image:
+build:
   stage: build
   script:
     - docker build -t $IMAGE_NAME:latest .
@@ -45,11 +28,11 @@ test:
   script:
     - docker run --rm $IMAGE_NAME:latest pytest tests/
   needs:
-    - build_image
+    - build
   tags:
     - docker
 
-push_image:
+push:
   stage: push
   script:
     - docker push $IMAGE_NAME:latest

@@ -2,11 +2,10 @@ stages:
   - build
 
 variables:
-  DOCKER_TLS_CERTDIR: ""
+  DOCKER_TLS_CERTDIR: ""  # Required for Docker-in-Docker to work without TLS
 
 services:
-  - name: docker:dind
-    alias: docker
+  - docker:dind
 
 build:
   stage: build
@@ -14,6 +13,6 @@ build:
   script:
     - docker info
     - docker version
-    - echo "Docker works in CI!"
+    - echo "✅ Docker works in CI!"
   tags:
     - docker

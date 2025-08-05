@@ -4,27 +4,48 @@ services:
   - docker:dind
 
 variables:
-  DOCKER_TLS_CERTDIR: ""          # Disable TLS for DinD
-  IMAGE_NAME: youni8/flask-app    # Your Docker Hub repo
+  DOCKER_TLS_CERTDIR: ""         # Disable TLS for DinD
+  IMAGE_NAME: youni8/flask-app    # Your Docker Hub repo here
 
 stages:
   - build
+  - test
   - push
 
 before_script:
+  # Install pip since docker image is minimal Alpine Linux
+  - apk add --no-cache py3-pip
+  - pip install --upgrade pip
+  # Login to Docker Hub using masked variables DOCKER_USERNAME and DOCKER_PASSWORD set in GitLab CI Settings
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
 build:
   stage: build
+  tags:
+    - docker
   script:
     - docker build -t $IMAGE_NAME:latest .
     - docker tag $IMAGE_NAME:latest $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+  retry: 2
+
+test:
+  stage: test
+  tags:
+    - docker
+  script:
+    - docker run --rm $IMAGE_NAME:latest pytest tests/
+  needs:
+    - build
 
 push:
   stage: push
+  tags:
+    - docker
   script:
     - docker push $IMAGE_NAME:latest
     - docker push $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+  needs:
+    - test
   only:
     - main
     - master

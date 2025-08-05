@@ -5,39 +5,33 @@ stages:
 
 variables:
   IMAGE_NAME: yourdockerhubusername/yourflaskapp
-  DOCKER_DRIVER: overlay2
-  DOCKER_HOST: tcp://docker:2375/
-  DOCKER_TLS_CERTDIR: ""
+  DOCKER_TLS_CERTDIR: ""  # Disable TLS for DinD (safe in CI sandbox only)
 
 services:
-  - docker:dind
+  - name: docker:dind
+    alias: docker
+
+before_script:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - pip install --upgrade pip
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
     - .cache/pip
 
-before_script:
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-
 build_image:
   stage: build
-  image: docker:latest
-  services:
-    - docker:dind
   script:
     - docker build -t $IMAGE_NAME:latest .
     - docker tag $IMAGE_NAME:latest $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
-  retry: 2
   tags:
     - docker
 
 test:
   stage: test
-  image: python:3.11
   script:
-    - pip install -r requirements.txt
-    - pytest tests/
+    - docker run --rm $IMAGE_NAME:latest pytest tests/
   needs:
     - build_image
   tags:
@@ -45,15 +39,13 @@ test:
 
 push_image:
   stage: push
-  image: docker:latest
-  services:
-    - docker:dind
   script:
     - docker push $IMAGE_NAME:latest
     - docker push $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
   needs:
     - test
+  only:
+    - main
+    - master
   tags:
     - docker
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master"'

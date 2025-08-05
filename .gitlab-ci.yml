@@ -5,20 +5,17 @@ stages:
 
 variables:
   IMAGE_NAME: yourdockerhubusername/yourflaskapp
-  DOCKER_TLS_CERTDIR: ""  # Disable TLS for DinD (safe in CI sandbox only)
+  DOCKER_TLS_CERTDIR: ""
 
 services:
   - name: docker:dind
     alias: docker
 
+# Use a Docker-enabled image instead of plain Python
+image: docker:latest
+
 before_script:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  - pip install --upgrade pip
-
-cache:
-  key: ${CI_COMMIT_REF_SLUG}
-  paths:
-    - .cache/pip
 
 build_image:
   stage: build

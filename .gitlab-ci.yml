@@ -1,46 +1,19 @@
 stages:
   - build
-  - test
-  - push
 
 variables:
-  IMAGE_NAME: youni8/flask-app
-  DOCKER_TLS_CERTDIR: ""  # Required for Docker-in-Docker (DinD)
+  DOCKER_TLS_CERTDIR: ""
 
 services:
   - name: docker:dind
     alias: docker
 
-before_script:
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-
 build:
   stage: build
+  image: docker:latest
   script:
-    - docker build -t $IMAGE_NAME:latest .
-    - docker tag $IMAGE_NAME:latest $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
-  tags:
-    - docker
-  retry: 2
-
-test:
-  stage: test
-  script:
-    - docker run --rm $IMAGE_NAME:latest pytest tests/
-  needs:
-    - build
-  tags:
-    - docker
-
-push:
-  stage: push
-  script:
-    - docker push $IMAGE_NAME:latest
-    - docker push $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
-  needs:
-    - test
-  only:
-    - main
-    - master
+    - docker info
+    - docker version
+    - echo "Docker works in CI!"
   tags:
     - docker

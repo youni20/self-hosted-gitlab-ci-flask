@@ -19,10 +19,12 @@ cache:
 
 before_script:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  - pip install --upgrade pip
 
 build_image:
   stage: build
+  image: docker:latest
+  services:
+    - docker:dind
   script:
     - docker build -t $IMAGE_NAME:latest .
     - docker tag $IMAGE_NAME:latest $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
@@ -43,6 +45,9 @@ test:
 
 push_image:
   stage: push
+  image: docker:latest
+  services:
+    - docker:dind
   script:
     - docker push $IMAGE_NAME:latest
     - docker push $IMAGE_NAME:$CI_COMMIT_SHORT_SHA

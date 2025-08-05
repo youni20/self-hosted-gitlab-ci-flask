@@ -1,28 +1,50 @@
 stages:
   - build
+  - test
   - push
 
 variables:
-  IMAGE_NAME: youni8/flask-app
-  DOCKER_TLS_CERTDIR: ""
+  IMAGE_NAME: youni8/flask-app   # Replace with your Docker Hub repo
+  DOCKER_TLS_CERTDIR: ""         # Needed to disable TLS in Docker-in-Docker
 
+# Enable Docker-in-Docker service with alias 'docker'
 services:
-  - docker:dind
+  - name: docker:dind
+    alias: docker
 
 before_script:
+  # Login to Docker Hub using variables set in GitLab CI/CD settings
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - pip install --upgrade pip
+  - pip install -r requirements.txt
 
 build:
   stage: build
   script:
     - docker build -t $IMAGE_NAME:latest .
     - docker tag $IMAGE_NAME:latest $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+  tags:
+    - docker
+  retry: 2
+
+test:
+  stage: test
+  script:
+    - docker run --rm $IMAGE_NAME:latest pytest tests/
+  needs:
+    - build
+  tags:
+    - docker
 
 push:
   stage: push
   script:
     - docker push $IMAGE_NAME:latest
     - docker push $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+  needs:
+    - test
   only:
     - main
     - master
+  tags:
+    - docker

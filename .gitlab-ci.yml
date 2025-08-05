@@ -1,18 +1,9 @@
 stages:
   - build
 
-variables:
-  DOCKER_TLS_CERTDIR: ""  # Required for Docker-in-Docker to work without TLS
-
-services:
-  - docker:dind
-
 build:
   stage: build
-  image: docker:latest
   script:
-    - docker info
-    - docker version
-    - echo "✅ Docker works in CI!"
-  tags:
-    - docker
+    - docker build -t youni8/flask-app .
+    - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+    - docker push youni8/flask-app

@@ -1,5 +1,4 @@
 stages:
-  - checkout
   - build
   - test
   - push
@@ -7,15 +6,12 @@ stages:
 variables:
   IMAGE_NAME: yourdockerhubusername/yourflaskapp
   DOCKER_DRIVER: overlay2
-  # Use Docker-in-Docker service to build images
   DOCKER_HOST: tcp://docker:2375/
   DOCKER_TLS_CERTDIR: ""
 
-# Use Docker service for DinD (Docker in Docker)
 services:
   - docker:dind
 
-# Cache pip packages for faster installs
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
@@ -25,31 +21,21 @@ before_script:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - pip install --upgrade pip
 
-checkout_code:
-  stage: checkout
-  script:
-    - echo "Code checked out automatically by GitLab"
-  rules:
-    - changes:
-        - "**/*"
-
 build_image:
   stage: build
   script:
     - docker build -t $IMAGE_NAME:latest .
     - docker tag $IMAGE_NAME:latest $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
-  artifacts:
-    paths:
-      - docker_image.tar
   retry: 2
   tags:
     - docker
 
 test:
   stage: test
+  image: python:3.11
   script:
-    # Run your tests inside a container to mirror prod environment
-    - docker run --rm $IMAGE_NAME:latest pytest tests/
+    - pip install -r requirements.txt
+    - pytest tests/
   needs:
     - build_image
   tags:
@@ -64,6 +50,5 @@ push_image:
     - test
   tags:
     - docker
-  only:
-    - main
-    - master
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master"'

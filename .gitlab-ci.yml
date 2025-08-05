@@ -15,7 +15,6 @@ stages:
 before_script:
   # Install pip since docker image is minimal Alpine Linux
   - apk add --no-cache py3-pip
-  - pip install --upgrade pip
   # Login to Docker Hub using masked variables DOCKER_USERNAME and DOCKER_PASSWORD set in GitLab CI Settings
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 

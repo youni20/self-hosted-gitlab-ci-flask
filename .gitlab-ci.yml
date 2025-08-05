@@ -1,22 +1,21 @@
+image: docker:latest  # Docker CLI available here
+
+services:
+  - docker:dind
+
+variables:
+  DOCKER_TLS_CERTDIR: ""
+  IMAGE_NAME: youni8/flask-app
+
 stages:
   - build
   - test
   - push
 
-variables:
-  IMAGE_NAME: youni8/flask-app   # Replace with your Docker Hub repo
-  DOCKER_TLS_CERTDIR: ""         # Needed to disable TLS in Docker-in-Docker
-
-# Enable Docker-in-Docker service with alias 'docker'
-services:
-  - name: docker:dind
-    alias: docker
-
 before_script:
-  # Login to Docker Hub using variables set in GitLab CI/CD settings
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - apk add --no-cache py3-pip  # install pip since docker image is Alpine-based minimal
   - pip install --upgrade pip
-  - pip install -r requirements.txt
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
 build:
   stage: build

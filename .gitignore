@@ -1,0 +1,21 @@
+# Ignore GitLab internal folders with sensitive data
+gitlab/config/
+gitlab/data/
+gitlab/logs/
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# Environment files
+.env
+.env.*
+
+# VSCode settings folder (optional)
+.vscode/
+
+# Docker-related files you don't want in repo (optional)
+docker-compose.override.yml
+
+# Node modules if you have any Node code (optional)
+node_modules/

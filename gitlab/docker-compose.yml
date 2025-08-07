@@ -1,0 +1,16 @@
+version: '3'
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    container_name: gitlab
+    restart: always
+    hostname: '192.168.1.71'  # With your real domain or IP
+    ports:
+      - '80:80'
+      - '443:443'
+      - '2222:22'  # For Git over SSH
+    volumes:
+      - ./config:/etc/gitlab
+      - ./logs:/var/log/gitlab
+      - ./data:/var/opt/gitlab
+    shm_size: '256m'

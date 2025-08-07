@@ -4,6 +4,9 @@ This project demonstrates how to set up a **self-hosted GitLab CE instance** wit
 
 ---
 
+<img width="1879" height="1009" alt="image" src="https://github.com/user-attachments/assets/34318554-8180-41d3-9e78-2f9ef5a9a748" />
+
+
 ## 🚀 Project Overview
 
 - **Host GitLab CE locally using Docker**
